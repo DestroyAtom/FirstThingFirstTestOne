@@ -33,12 +33,27 @@ public class MagnetometerFunction extends AppCompatActivity {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             java.text.DecimalFormat df= new java.text.DecimalFormat("#.00");
-            float temp0=Float.parseFloat(df.format(sensorEvent.values[0]));
-            float temp1= Float.parseFloat(df.format(sensorEvent.values[1]));
-            float temp2=Float.parseFloat(df.format(sensorEvent.values[2]));
-            String X=""+temp0;
-            String Y=""+temp1;
-            String Z=""+temp2;
+            float tempx=Float.parseFloat(df.format(sensorEvent.values[0]));
+            float tempy= Float.parseFloat(df.format(sensorEvent.values[1]));
+            float tempz=Float.parseFloat(df.format(sensorEvent.values[2]));
+            String X=""+tempx;
+            String Y=""+tempy;
+            String Z=""+tempz;
+            double direction= (float) 0.0;
+            if(sensorEvent.values[0]>0){
+                direction=270+Math.atan(sensorEvent.values[1]/sensorEvent.values[0])*108/3.1415926;
+            }
+            else if(sensorEvent.values[0]<0){
+                direction=90+Math.atan(sensorEvent.values[1]/sensorEvent.values[0])*108/3.1415926;
+            }
+            else if(sensorEvent.values[0]==0 && sensorEvent.values[1]>0){
+                direction=0;
+            }
+            else if(sensorEvent.values[0]==0 && sensorEvent.values[1]<0){
+                direction=180;
+            }
+            String temp="Exact Heading: "+direction;
+            resultTextView.setText(temp);
 //            String X=""+sensorEvent.values[0];
 //            String Y=""+sensorEvent.values[1];
 //            String Z=""+sensorEvent.values[2];

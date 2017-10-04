@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 switchBtn=1;
+                angle[2]=0;
+                gyro2TextView.setText("0.0");
             }
         });
 
@@ -87,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
             if(switchBtn==1){
                 if(sensorEvent.values[2]>0.1 | sensorEvent.values[2]<-0.1){
-                    angle[2]+=sensorEvent.values[2]*dT;
+                    angle[2]+=sensorEvent.values[2]*dT*180/3.1415926;
                     String temp=""+angle[2];
                     gyro2TextView.setText("Z: "+temp);
                 }
