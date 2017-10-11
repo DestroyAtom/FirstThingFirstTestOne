@@ -2,10 +2,12 @@ package yanshengliu.batteryfunction;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.CountDownTimer;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private BatteryManager mBatteryManager;
     private Intent batteryStatus;
     private IntentFilter ifilter;
-    private float batteryPct;
+    private float batteryPct,initial;
     private String taskInfo;
     private int bNum;
 
@@ -48,32 +50,27 @@ public class MainActivity extends AppCompatActivity {
         taskBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                float atTheVeryBegining=batteryPct;
-                taskInfo="Start:";
-                new TimeCount(60000,1000).start();
+                initial=batteryPct;
+                if(bNum==0){
+                    taskInfo="Normal usage of mobile phone for 10 minutes:\n";
+                }else if(bNum==1){
+                    taskInfo+="\nUsing GPS for 10 minutes:\n";
+                }else if(bNum==2){
+                    taskInfo+="\nUsing WiFi for 10 minutes:\n";
+                }
+                if(bNum<=2){
+                    taskInfo=taskInfo+"Initial level: "+initial+"%\n";
+                    taskTextView.setText(taskInfo);
+                    new TimeCount(5000,1000).start();
+                }else{
+                    taskInfo=taskInfo+"Mission Complete!\n";
+                    taskTextView.setText(taskInfo);
+                }
+
             }
         });
     }
 
-    public class TimeCount extends CountDownTimer{
-
-        public TimeCount(long millisInFuture, long countDownInterval){
-            super(millisInFuture, countDownInterval);
-        }
-
-        @Override
-        public void onTick(long l) {
-            taskInfo+="\n"+bNum;
-            bNum++;
-            taskTextView.setText(taskInfo);
-        }
-
-        @Override
-        public void onFinish() {
-            taskInfo+="\nWELL PLAY!";
-            taskTextView.setText(taskInfo);
-        }
-    }
     public class PowerConnectionReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -104,9 +101,53 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.e("Battery",result);
             statusTextView.setText(result);
-//            statusTextView.setText("Yes!!!!");
         }
     }
 
+
+    private class TimeCount extends CountDownTimer{
+
+        private TimeCount(long millisInFuture, long countDownInterval){
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long l) {
+            taskInfo+="*";
+            taskTextView.setText(taskInfo);
+        }
+
+        @Override
+        public void onFinish() {
+            taskInfo=taskInfo.replace("*","");
+            float finalLevel=batteryPct;
+            taskInfo=taskInfo+"Final level: "+finalLevel+"%\n";
+            float consumedLevel=initial-finalLevel;
+            taskInfo=taskInfo+"Consumed battery: "+consumedLevel+"%\n";
+            taskTextView.setText(taskInfo);
+            PopupDialog();
+        }
+    }
+
+    private void PopupDialog() {
+        AlertDialog.Builder builder= new AlertDialog.Builder(this);
+        if(bNum==0){
+            builder.setMessage("Open GPS Function And Press Task");
+            bNum++;
+        }else if(bNum==1){
+            builder.setMessage("Open WiFi Function And Press Task");
+            bNum++;
+        }else{
+            builder.setMessage("Mission Complete!");
+            bNum++;
+        }
+        builder.setPositiveButton("sure", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        builder.create().show();
+    }
 
 }
